@@ -1,23 +1,24 @@
 import math
 
-from torch import nn
+import einops.layers.torch as einops_torch
 import torch
+from torch import nn
 
 
-class PositionalEncoding(nn.Module):
+class PositionalEmbedding(nn.Module):
 
-    def __init__(self, d_model, max_len):
+    def __init__(self, embedding_dim, max_length):
         """
         Inputs
             d_model - Hidden dimensionality of the input.
             max_len - Maximum length of a sequence to expect.
         """
-        super(PositionalEncoding, self).__init__()
+        super(PositionalEmbedding, self).__init__()
 
         # Create matrix of sequence x embedding representing the positional encoding for max_len inputs
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe = torch.zeros(max_length, embedding_dim)
+        position = torch.arange(0, max_length, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, embedding_dim, 2).float() * (-math.log(10000.0) / embedding_dim))
 
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
@@ -33,37 +34,23 @@ class PositionalEncoding(nn.Module):
         return x
 
 
-class PatchEncoding(nn.Module):
-    """
-    The standard Transformer receives as input a `1D` sequence of token embeddings.
-    To handle `2D` images, we reshape the image
-        .. math:: X^{W \cdot H \cdot C}  X^{N \cdot (P \cdot P \cdot C)}
-    """
-
-    def __init__(self, patch_size: int):
-        super(PatchEncoding, self).__init__()
+class PatchEmbedding(nn.Module):
+    def __init__(
+            self,
+            patch_size: int,
+            in_channels: int,
+            projection_dim: int
+    ):
+        super(PatchEmbedding, self).__init__()
         self.patch_size = patch_size
 
-    def forward(self, x):
-        assert x.dim() == 4, f"Expected 4D tensor but got: {x.dim()}D"
+        self.patch_extractor = einops_torch.Rearrange("b c (p h) (p w) -> b (h w) (p p c)", p=patch_size)
+        self.patch_projector = nn.Linear(patch_size * patch_size * in_channels, projection_dim)
 
-        batch, channels, height, width = x.shape
+    def forward(self, images):
+        assert images.dim() == 4, f"Expected 4D tensor but got: {images.dim()}D"
 
-        height_patches = height // self.patch_size
-        width_patches = width // self.patch_size
-
-        assert height_patches * self.patch_size == height, "Image height must be divisible by `path_size`"
-        assert width_patches * self.patch_size == width, "Image width must be divisible by `path_size`"
-
-        patches = x.unfold(2, self.patch_size, self.patch_size)
-
-        # batch x channels x h_patches x w_patches x patch_size x patch_size
-        patches = patches.unfold(3, self.patch_size, self.patch_size)
-
-        # batch x h_patches x w_patches x channels x patch_size x patch_size
-        patches = patches.permute(0, 2, 3, 1, 4, 5)
-
-        # batch x (h_patches * w_patches) x (channels * patch_size * patch_size)
-        patches = patches.reshape(batch, height_patches * width_patches, -1)
+        patches = self.patch_extractor(images)
+        patches = self.patch_projector(patches)
 
         return patches

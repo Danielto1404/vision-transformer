@@ -28,41 +28,42 @@ $ pip install git@github.com:Danielto1404/vision-transformer.git
 
 ```python
 import torch
-from model import VIT
+from vit import VIT
 
-model = VIT(
-    image_size=(3, 28, 28),   # channels x height x width  
-    patch_size=4,             # n x n patch
-    layers=4,                 # transformer layers
-    heads=4,                  # number od transformer encoder heads
-    feedforward_dim=64,       # transformer encoder mlp dimension
-    dropout=0.5               # dropout
-)
-
-d_model = model.d_model       # 48 (patch * patch * channels)
-
-x = torch.rand(32, 3, 28, 28) # batch x channels x height x width
-features = model(x)           # batch x d_model
+# model = VIT(
+#     image_size=(3, 28, 28),  # channels x height x width  
+#     patch_size=4,  # n x n patch
+#     layers=4,  # transformer layers
+#     heads=4,  # number od transformer encoder heads
+#     feedforward_dim=64,  # transformer encoder mlp dimension
+#     dropout=0.5  # dropout
+# )
+# 
+# d_model = model.d_model  # 48 (patch * patch * channels)
+# 
+# x = torch.rand(32, 3, 28, 28)  # batch x channels x height x width
+# features = model(x)  # batch x d_model
 ```
 
 ### Classifier Example
 
 ```python
-import torch
-from model import VITClassifier
-
-classifier = VITClassifier(
-    image_size=(3, 28, 28),   # channels x height x width 
-    num_classes=10,           # amount of classes 
-    patch_size=4,             # n x n patch
-    layers=4,                 # transformer layers
-    heads=4,                  # number od transformer encoder heads
-    feedforward_dim=64,       # transformer encoder mlp dimension
-    dropout=0.5               # dropout
-)
-
-x = torch.rand(32, 3, 28, 28) # batch x channels x height x width
-classes = classifier(x)       # batch x num_classes
+# import torch
+# from vit import VITClassifier
+# 
+# classifier = VITClassifier(
+#     image_size=(3, 28, 28),  # channels x height x width 
+#     num_classes=10,  # amount of classes 
+#     patch_size=4,  # n x n patch
+#     layers=4,  # transformer layers
+#     heads=4,
+#     # number od transformer encoder heads
+#     feedforward_dim=64,  # transformer encoder mlp dimension
+#     dropout=0.5  # dropout
+# )
+# 
+# x = torch.rand(32, 3, 28, 28)  # batch x channels x height x width
+# classes = classifier(x)  # batch x num_classes
 ```
 
 

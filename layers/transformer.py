@@ -1,58 +1,72 @@
-from typing import Union
-
-import torch
 from torch import nn
 
-from layers.mha import MultiHeadAttention
+from layers.attention import MultiHeadAttention
 
 
-class TransformerEncoderMLP(nn.Module):
+class PreLayerNorm(nn.Module):
     def __init__(
             self,
-            d_model: int,
-            feedforward_dim: int,
+            dim: int,
+            layer: nn.Module
+    ):
+        super(PreLayerNorm, self).__init__()
+        self.norm = nn.LayerNorm(dim)
+        self.layer = layer
+
+    def forward(self, x, **kwargs):
+        x = self.norm(x)
+        x = self.layer(x, **kwargs)
+
+        return x
+
+
+class FeedForward(nn.Module):
+    def __init__(
+            self,
+            dim: int,
+            hidden_dim: int,
             dropout=0.0
     ):
-        super(TransformerEncoderMLP, self).__init__()
+        super(FeedForward, self).__init__()
 
-        self.mlp = nn.Sequential(
-            nn.Linear(d_model, feedforward_dim),
+        self.ff = nn.Sequential(
+            nn.Linear(dim, hidden_dim),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(feedforward_dim, d_model),
+            nn.Linear(hidden_dim, dim),
             nn.Dropout(dropout)
         )
 
     def forward(self, x):
-        return self.mlp(x)
+        return self.ff(x)
 
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(
             self,
-            d_model: int,
-            heads: int,
-            feedforward_dim: int,
-            dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5,
-            device: Union[str, torch.device] = "cpu"
+            embedding_dim: int,
+            heads: int = 8,
+            head_dim: int = 64,
+            feedforward_dim: int = 1024,
+            dropout: float = 0.0
     ):
         super(TransformerEncoderLayer, self).__init__()
 
-        self.device = device
+        mha = MultiHeadAttention(
+            embedding_dim=embedding_dim,
+            heads=heads,
+            head_dim=head_dim,
+            dropout=dropout
+        )
 
-        self.multi_head_attention = nn.MultiheadAttention(d_model, heads, dropout)
+        mlp = FeedForward(embedding_dim, feedforward_dim, dropout)
 
-        self.input_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
-        self.output_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
-
-        self.mlp = TransformerEncoderMLP(d_model, feedforward_dim, dropout)
+        self.normed_mha = PreLayerNorm(embedding_dim, mha)
+        self.normed_mlp = PreLayerNorm(embedding_dim, mlp)
 
     def forward(self, x):
-        x = self.input_norm(x)
-        a, _ = self.multi_head_attention(x, x, x)
-        x = self.output_norm(a + x)
-        x = self.mlp(x)
+        x = self.normed_mha(x)
+        x = self.normed_mlp(x)
 
         return x
 
@@ -60,27 +74,24 @@ class TransformerEncoderLayer(nn.Module):
 class TransformerEncoder(nn.Module):
     def __init__(
             self,
-            d_model: int,
+            embedding_dim: int,
             layers: int,
-            heads: int,
-            feedforward_dim: int,
-            dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5,
-            device: Union[str, torch.device] = "cpu"
+            heads: int = 8,
+            head_dim: int = 64,
+            feedforward_dim: int = 1024,
+            dropout: float = 0.0
     ):
         super(TransformerEncoder, self).__init__()
 
         self.layers = layers
-        self.device = device
 
         self.encoders = nn.ModuleList([
             TransformerEncoderLayer(
-                d_model=d_model,
+                embedding_dim=embedding_dim,
                 heads=heads,
+                head_dim=head_dim,
                 feedforward_dim=feedforward_dim,
-                dropout=dropout,
-                layer_norm_eps=layer_norm_eps,
-                device=device
+                dropout=dropout
             ) for _ in range(layers)
         ])
 
