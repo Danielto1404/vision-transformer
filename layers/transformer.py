@@ -1,3 +1,6 @@
+from typing import Union
+
+import torch
 from torch import nn
 
 from layers.mha import MultiHeadAttention
@@ -31,15 +34,14 @@ class TransformerEncoderLayer(nn.Module):
             heads: int,
             feedforward_dim: int,
             dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5
+            layer_norm_eps: float = 1e-5,
+            device: Union[str, torch.device] = "cpu"
     ):
         super(TransformerEncoderLayer, self).__init__()
 
-        self.heads = heads
-        self.feedforward_dim = feedforward_dim
-        self.dropout = dropout
+        self.device = device
 
-        self.multi_head_attention = MultiHeadAttention(d_model, heads, dropout=dropout)
+        self.multi_head_attention = MultiHeadAttention(d_model, heads, dropout=dropout, device=device)
 
         self.input_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
         self.output_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
@@ -63,13 +65,13 @@ class TransformerEncoder(nn.Module):
             heads: int,
             feedforward_dim: int,
             dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5
+            layer_norm_eps: float = 1e-5,
+            device: Union[str, torch.device] = "cpu"
     ):
         super(TransformerEncoder, self).__init__()
 
         self.layers = layers
-        self.heads = heads
-        self.feedforward_dim: int
+        self.device = device
 
         self.encoders = nn.ModuleList([
             TransformerEncoderLayer(
@@ -77,7 +79,8 @@ class TransformerEncoder(nn.Module):
                 heads=heads,
                 feedforward_dim=feedforward_dim,
                 dropout=dropout,
-                layer_norm_eps=layer_norm_eps
+                layer_norm_eps=layer_norm_eps,
+                device=device
             ) for _ in range(layers)
         ])
 

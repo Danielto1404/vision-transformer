@@ -44,7 +44,8 @@ class VIT(nn.Module):
             heads=heads,
             feedforward_dim=feedforward_dim,
             dropout=dropout,
-            layer_norm_eps=layer_norm_eps
+            layer_norm_eps=layer_norm_eps,
+            device=device
         )
 
     def forward(self, x):

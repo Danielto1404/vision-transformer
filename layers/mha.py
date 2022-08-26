@@ -1,5 +1,5 @@
 import math
-from typing import Optional
+from typing import Optional, Union
 
 import torch
 from torch import nn
@@ -11,10 +11,9 @@ class MultiHeadAttention(nn.Module):
             self,
             embedding_dim: int,
             heads: int,
-            add_kv_bias: bool = True,
-            add_bias: bool = True,
             qkv_dim: Optional[int] = None,
-            dropout=0.0
+            dropout=0.0,
+            device: Union[str, torch.device] = 'cpu'
     ):
         super(MultiHeadAttention, self).__init__()
 
@@ -26,19 +25,12 @@ class MultiHeadAttention(nn.Module):
         self.embedding_dim = embedding_dim
         self.heads = heads
         self.dropout = dropout
+        self.device = device
 
-        self.WQ = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True)
-        self.WK = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True)
-        self.WV = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True)
-        self.W0 = torch.empty((self.qkv_dim, embedding_dim), requires_grad=True)
-
-        self.qk_bias = None
-        if add_kv_bias:
-            self.qk_bias = torch.rand(self.qkv_dim, requires_grad=True)
-
-        self.bias = None
-        if add_bias:
-            self.bias = torch.rand(self.embedding_dim, requires_grad=True)
+        self.WQ = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True).to(device)
+        self.WK = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True).to(device)
+        self.WV = torch.empty((embedding_dim, self.qkv_dim), requires_grad=True).to(device)
+        self.W0 = torch.empty((self.qkv_dim, embedding_dim), requires_grad=True).to(device)
 
         self.__setup__()
 
