@@ -80,7 +80,8 @@ class VITClassifier(VIT):
             heads: int,
             feedforward_dim: int = 2048,
             dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5
+            layer_norm_eps: float = 1e-5,
+            device: Union[str, torch.device] = 'cpu'
     ):
         super(VITClassifier, self).__init__(
             image_size,
@@ -89,7 +90,8 @@ class VITClassifier(VIT):
             heads,
             feedforward_dim,
             dropout,
-            layer_norm_eps
+            layer_norm_eps,
+            device
         )
 
         self.num_classes = num_classes
