@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import torch
 from torch import nn
@@ -16,18 +16,20 @@ class VIT(nn.Module):
             heads: int,
             feedforward_dim: int = 2048,
             dropout: float = 0.0,
-            layer_norm_eps: float = 1e-5
+            layer_norm_eps: float = 1e-5,
+            device: Union[str, torch.device] = 'cpu'
     ):
         super(VIT, self).__init__()
 
         channels, height, width = image_size
 
+        self.device = device
         self.in_channels = channels
         self.patch_size = patch_size
         self.d_model = patch_size * patch_size * channels
         self.seq_len = height * width // patch_size ** 2
 
-        self.cls_token = torch.zeros(self.d_model, requires_grad=True)
+        self.cls_token = torch.zeros(self.d_model, requires_grad=True).to(device)
 
         self.positional_encoder = PositionalEncoding(
             d_model=self.d_model,
@@ -44,6 +46,8 @@ class VIT(nn.Module):
             dropout=dropout,
             layer_norm_eps=layer_norm_eps
         )
+
+        self.to(device)
 
     def forward(self, x):
         batch, _, _, _ = x.shape
