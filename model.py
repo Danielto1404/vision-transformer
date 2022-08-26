@@ -1,47 +1,63 @@
+from typing import Tuple
+
 import torch
 from torch import nn
 
 from layers.encoder import TransformerEncoder
-from layers.patches import ImagePatcher
+from layers.embeddings import PositionalEncoding, PatchEncoding
 
 
 class VIT(nn.Module):
     def __init__(
             self,
-            in_channels: int,
+            image_size: Tuple[int, int, int],
             patch_size: int,
             layers: int,
             heads: int,
             feedforward_dim: int = 2048,
             dropout: float = 0.0,
-            activation=nn.GELU(),
             layer_norm_eps: float = 1e-5
     ):
         super(VIT, self).__init__()
 
-        self.in_channels = in_channels
+        channels, height, width = image_size
+
+        self.in_channels = channels
         self.patch_size = patch_size
-        self.d_model = patch_size * patch_size * in_channels
+        self.d_model = patch_size * patch_size * channels
+        self.seq_len = height * width // self.d_model
 
         self.cls_token = torch.zeros(self.d_model, requires_grad=True)
 
-        self.patcher = ImagePatcher(patch_size)
+        self.positional_encoder = PositionalEncoding(
+            d_model=self.d_model,
+            max_len=self.seq_len + 1  # add extra cls token
+        )
+
+        self.patch_encoder = PatchEncoding(patch_size)
+
         self.encoder = TransformerEncoder(
             d_model=self.d_model,
             layers=layers,
             heads=heads,
             feedforward_dim=feedforward_dim,
             dropout=dropout,
-            activation=activation,
             layer_norm_eps=layer_norm_eps
         )
 
     def forward(self, x):
+        batch, _, _, _ = x.shape
+
         # batch x seq x dim
-        x = self.patcher(x)
+        x = self.patch_encoder(x)
+
+        # expand cls token into batch
+        cls = self.cls_token.expand(batch, 1, -1)
 
         # batch x (seq + 1) x dim
-        x = torch.cat([self.cls_token.unsqueeze(0).unsqueeze(0), x], 1)
+        x = torch.cat([cls, x], 1)
+
+        x = self.positional_encoder(x)
 
         # batch x (seq + 1) x dim
         x = self.encoder(x)
@@ -54,28 +70,27 @@ class VITClassifier(VIT):
     def __init__(
             self,
             num_classes: int,
-            in_channels: int,
+            image_size: Tuple[int, int, int],
             patch_size: int,
             layers: int,
             heads: int,
             feedforward_dim: int = 2048,
             dropout: float = 0.0,
-            activation=nn.GELU(),
             layer_norm_eps: float = 1e-5
     ):
         super(VITClassifier, self).__init__(
-            in_channels,
+            image_size,
             patch_size,
             layers,
             heads,
             feedforward_dim,
             dropout,
-            activation,
             layer_norm_eps
         )
 
         self.num_classes = num_classes
 
+        self.norm = nn.LayerNorm(self.d_model, eps=layer_norm_eps)
         self.classifier = nn.Linear(
             in_features=self.d_model,
             out_features=num_classes
@@ -83,6 +98,7 @@ class VITClassifier(VIT):
 
     def forward(self, x):
         x = super(VITClassifier, self).forward(x)
+        x = self.norm(x)
         x = self.classifier(x)
 
         return x
