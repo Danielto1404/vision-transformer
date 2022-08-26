@@ -33,7 +33,7 @@ class VIT(nn.Module):
         self.channels = channels
         self.patch_size = patch_size
         self.embedding_dim = embedding_dim
-        self.num_patches = (height // patch_size) * (width // width)
+        self.num_patches = (height // patch_size) * (width // patch_size)
         self.patch_dim = channels * patch_size * patch_size
 
         self.cls_token = nn.Parameter(torch.rand(1, 1, self.embedding_dim))
