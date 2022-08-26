@@ -25,7 +25,7 @@ class VIT(nn.Module):
         self.in_channels = channels
         self.patch_size = patch_size
         self.d_model = patch_size * patch_size * channels
-        self.seq_len = height * width // self.d_model
+        self.seq_len = height * width // patch_size ** 2
 
         self.cls_token = torch.zeros(self.d_model, requires_grad=True)
 
