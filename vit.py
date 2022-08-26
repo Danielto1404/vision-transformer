@@ -37,11 +37,7 @@ class VIT(nn.Module):
         self.patch_dim = channels * patch_size * patch_size
 
         self.cls_token = nn.Parameter(torch.rand(1, 1, self.embedding_dim))
-
-        self.positional_embedding = PositionalEmbedding(
-            embedding_dim=embedding_dim,
-            max_length=self.num_patches + 1  # add extra cls token
-        )
+        self.positional_embedding = nn.Parameter(torch.randn(1, self.num_patches + 1, self.embedding_dim))
 
         self.patch_embedding = PatchEmbedding(patch_size, channels, embedding_dim)
 
@@ -64,7 +60,7 @@ class VIT(nn.Module):
         cls = self.cls_token.expand(batch, 1, -1)
         x = torch.cat([cls, x], 1)
 
-        x = self.positional_embedding(x)
+        x = self.positional_embedding + x
         x = self.transformer(x)
         x = self.pooling(x)
 
