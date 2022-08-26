@@ -3,7 +3,7 @@ from typing import Tuple
 import torch
 from torch import nn
 
-from layers.encoder import TransformerEncoder
+from layers.transformer import TransformerEncoder
 from layers.embeddings import PositionalEncoding, PatchEncoding
 
 

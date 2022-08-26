@@ -50,16 +50,11 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, x):
         """
-        Applies self-attention to
-
-        :param x:
-        :return:
+        Applies multi-head self-attention to given sequence
         """
         q = x @ self.WQ
         k = x @ self.WK
         v = x @ self.WV
-
-        # print(x.shape)
 
         # batch x seq x dim => batch x dim x seq
         k = k.transpose(2, 1)
@@ -67,7 +62,7 @@ class MultiHeadAttention(nn.Module):
         attentions = torch.bmm(q, k) / math.sqrt(self.head_dim)
         attentions = nn.functional.softmax(attentions, dim=-1)
 
-        if self.dropout > 0.0:
+        if self.training and self.dropout > 0.0:
             attentions = nn.functional.dropout(attentions, p=self.dropout)
 
         z = torch.bmm(attentions, v)

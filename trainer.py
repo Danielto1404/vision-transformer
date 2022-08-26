@@ -76,10 +76,9 @@ if __name__ == '__main__':
     )
 
     model = VITClassifier(
-        image_size=(28, 28),
+        image_size=(1, 28, 28),
         num_classes=len(classes),
         patch_size=4,
-        in_channels=1,
         layers=4,
         heads=4,
         feedforward_dim=64,
@@ -89,15 +88,14 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    train(model, criterion, optimizer, trainloader, testloader, epochs=5)
+    train(model, criterion, optimizer, trainloader, testloader, epochs=10)
 
     torch.save(model, 'model.pth')
     #
-    # m = torch.load('model.pth')
+    # model = torch.load('model.pth')
 
     for x, y in testloader:
         with torch.no_grad():
             y_hat = model(x)
 
             print(y, y_hat.argmax(1))
-            break

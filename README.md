@@ -12,6 +12,18 @@ to multiple mid-sized or small image recognition benchmarks (ImageNet, CIFAR-100
 attains excellent results compared to state-of-the-art convolutional networks while requiring substantially fewer
 computational resources to train."
 
+
+### Installation
+_HTTPS_:
+```shell
+$ pip install git+https://github.com/Danielto1404/vision-transformer.git
+```
+
+_SSH_:
+```shell
+$ pip install git@github.com:Danielto1404/vision-transformer.git
+```
+
 ### VIT Feature extractor example
 
 ```python

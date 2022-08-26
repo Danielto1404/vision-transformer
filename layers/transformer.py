@@ -1,6 +1,6 @@
 from torch import nn
 
-from layers.attentions import MultiHeadAttention
+from layers.mha import MultiHeadAttention
 
 
 class TransformerEncoderMLP(nn.Module):
