@@ -44,7 +44,9 @@ class PatchEmbedding(nn.Module):
         super(PatchEmbedding, self).__init__()
         self.patch_size = patch_size
 
-        self.patch_extractor = einops_torch.Rearrange("b c (p h) (p w) -> b (h w) (p p c)", p=patch_size)
+        self.patch_extractor = einops_torch.Rearrange(
+            "b c (h_stride h) (w_stride w) -> b (h w) (h_stride w_stride c)", h_stride=patch_size, w_stride=patch_size
+        )
         self.patch_projector = nn.Linear(patch_size * patch_size * in_channels, projection_dim)
 
     def forward(self, images):

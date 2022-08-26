@@ -19,13 +19,13 @@ class VIT(nn.Module):
             head_dim: int = 64,
             feedforward_dim: int = 1024,
             dropout: float = 0.0,
-            pooling: str = 'cls'
+            pooling: str = "cls"
     ):
         super(VIT, self).__init__()
 
         channels, height, width = image_size
 
-        assert pooling in ['cls', 'mean'], "Unknown pooling type, possible pooling: [`cls`, `mean`]"
+        assert pooling in ["cls", "mean"], "Unknown pooling type, possible pooling: [`cls`, `mean`]"
 
         assert height % patch_size == 0 and width % patch_size == 0, \
             "Image dimensions must be divisible by the patch size."
@@ -54,7 +54,7 @@ class VIT(nn.Module):
             dropout=dropout
         )
 
-        self.pooling = ClsPooling() if pooling == 'cls' else MeanPooling()
+        self.pooling = ClsPooling() if pooling == "cls" else MeanPooling()
 
     def forward(self, x):
         batch, _, _, _ = x.shape
@@ -83,7 +83,7 @@ class VITClassifier(VIT):
             head_dim: int = 64,
             feedforward_dim: int = 1024,
             dropout: float = 0.0,
-            pooling: str = 'cls'
+            pooling: str = "cls"
     ):
         super(VITClassifier, self).__init__(
             image_size=image_size,
