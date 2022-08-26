@@ -47,8 +47,6 @@ class VIT(nn.Module):
             layer_norm_eps=layer_norm_eps
         )
 
-        self.to(device)
-
     def forward(self, x):
         batch, _, _, _ = x.shape
 
