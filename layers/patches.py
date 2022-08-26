@@ -35,33 +35,3 @@ class ImagePatcher(nn.Module):
         patches = patches.reshape(batch, height_patches * width_patches, -1)
 
         return patches
-
-
-if __name__ == '__main__':
-    import torchvision.io
-    import matplotlib.pyplot as plt
-
-    img = torchvision.io.read_image('../assets/tukan.jpeg')
-
-    PATCH_SIZE = 160
-    CHANNELS = img.shape[0]
-
-    patcher = ImagePatcher(PATCH_SIZE)
-
-    patch, (c, h, w) = patcher(img.unsqueeze(0))
-    patch = patch[0]
-
-    fig, axs = plt.subplots(h, w, sharex='all', sharey='all')
-
-    for hi in range(h):
-        for wi in range(w):
-            ax = axs[hi][wi]
-
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.imshow(patch[hi * w + wi].reshape(CHANNELS, PATCH_SIZE, PATCH_SIZE).permute(1, 2, 0).numpy())
-
-    plt.subplots_adjust(wspace=0.1, hspace=0.05)
-    plt.show()
-    plt.imshow(img.permute(1, 2, 0).numpy())
-    plt.show()
