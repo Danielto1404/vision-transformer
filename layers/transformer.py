@@ -41,7 +41,7 @@ class TransformerEncoderLayer(nn.Module):
 
         self.device = device
 
-        self.multi_head_attention = MultiHeadAttention(d_model, heads, dropout=dropout, device=device)
+        self.multi_head_attention = nn.MultiheadAttention(d_model, heads, dropout)
 
         self.input_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
         self.output_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
@@ -50,8 +50,8 @@ class TransformerEncoderLayer(nn.Module):
 
     def forward(self, x):
         x = self.input_norm(x)
-        x = self.multi_head_attention(x) + x
-        x = self.output_norm(x)
+        a, _ = self.multi_head_attention(x, x, x)
+        x = self.output_norm(a + x)
         x = self.mlp(x)
 
         return x
