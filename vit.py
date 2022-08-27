@@ -13,11 +13,11 @@ class VIT(nn.Module):
             self,
             image_size: Tuple[int, int, int],
             patch_size: int,
-            embedding_dim: int,
+            embedding_dim: int = 768,
             layers: int = 4,
-            heads: int = 8,
+            heads: int = 12,
             head_dim: int = 64,
-            feedforward_dim: int = 1024,
+            feedforward_dim: int = 2048,
             dropout: float = 0.0,
             pooling: str = "cls"
     ):
@@ -40,8 +40,8 @@ class VIT(nn.Module):
         self.patch_embedding = PatchEmbedding(patch_size, channels, embedding_dim)
 
         self.transformer = TransformerEncoder(
-            embedding_dim=embedding_dim,
             layers=layers,
+            embedding_dim=embedding_dim,
             heads=heads,
             head_dim=head_dim,
             feedforward_dim=feedforward_dim,
@@ -79,11 +79,11 @@ class VITClassifier(VIT):
             num_classes: int,
             image_size: Tuple[int, int, int],
             patch_size: int,
-            embedding_dim: int,
+            embedding_dim: int = 768,
             layers: int = 4,
-            heads: int = 8,
+            heads: int = 12,
             head_dim: int = 64,
-            feedforward_dim: int = 1024,
+            feedforward_dim: int = 2048,
             dropout: float = 0.0,
             pooling: str = "cls"
     ):

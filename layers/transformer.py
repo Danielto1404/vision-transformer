@@ -44,10 +44,10 @@ class FeedForward(nn.Module):
 class TransformerEncoderLayer(nn.Module):
     def __init__(
             self,
-            embedding_dim: int,
-            heads: int = 8,
+            embedding_dim: int = 768,
+            heads: int = 12,
             head_dim: int = 64,
-            feedforward_dim: int = 1024,
+            feedforward_dim: int = 2048,
             dropout: float = 0.0
     ):
         super(TransformerEncoderLayer, self).__init__()
@@ -74,11 +74,11 @@ class TransformerEncoderLayer(nn.Module):
 class TransformerEncoder(nn.Module):
     def __init__(
             self,
-            embedding_dim: int,
             layers: int,
-            heads: int = 8,
+            embedding_dim: int = 768,
+            heads: int = 12,
             head_dim: int = 64,
-            feedforward_dim: int = 1024,
+            feedforward_dim: int = 2048,
             dropout: float = 0.0
     ):
         super(TransformerEncoder, self).__init__()
