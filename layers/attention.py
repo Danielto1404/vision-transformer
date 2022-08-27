@@ -10,6 +10,7 @@ class MultiHeadAttention(nn.Module):
             embedding_dim: int,
             heads: int = 8,
             head_dim: int = 64,
+            bias: bool = True,
             dropout: float = 0.0
     ):
         super(MultiHeadAttention, self).__init__()
@@ -23,7 +24,7 @@ class MultiHeadAttention(nn.Module):
         self.Q_K_V = nn.Linear(embedding_dim, 3 * inner_dim, bias=False)
 
         self.projector = nn.Sequential(
-            nn.Linear(inner_dim, embedding_dim),
+            nn.Linear(inner_dim, embedding_dim, bias=bias),
             nn.Dropout(dropout)
         )
 

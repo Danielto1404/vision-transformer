@@ -65,8 +65,8 @@ class TransformerEncoderLayer(nn.Module):
         self.normed_mlp = PreLayerNorm(embedding_dim, mlp)
 
     def forward(self, x):
-        x = self.normed_mha(x)
-        x = self.normed_mlp(x)
+        x = self.normed_mha(x) + x
+        x = self.normed_mlp(x) + x
 
         return x
 
