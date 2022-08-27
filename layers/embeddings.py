@@ -1,19 +1,24 @@
 import math
+from typing import Union, Tuple
 
-import einops.layers.torch as einops_torch
+from einops import rearrange
 import torch
 from torch import nn
 
 
-class PositionalEmbedding(nn.Module):
+class SinCosEmbedding(nn.Module):
 
-    def __init__(self, embedding_dim, max_length):
+    def __init__(
+            self,
+            embedding_dim: int,
+            max_length: int
+    ):
         """
         Inputs
-            d_model - Hidden dimensionality of the input.
+            embedding_dim - Hidden dimensionality of the input.
             max_len - Maximum length of a sequence to expect.
         """
-        super(PositionalEmbedding, self).__init__()
+        super(SinCosEmbedding, self).__init__()
 
         # Create matrix of sequence x embedding representing the positional encoding for max_len inputs
         pe = torch.zeros(max_length, embedding_dim)
@@ -37,22 +42,23 @@ class PositionalEmbedding(nn.Module):
 class PatchEmbedding(nn.Module):
     def __init__(
             self,
-            patch_size: int,
+            patch_size: Union[int, Tuple[int, int]],
             in_channels: int,
-            projection_dim: int
+            embedding_dim: int
     ):
         super(PatchEmbedding, self).__init__()
-        self.patch_size = patch_size
 
-        self.patch_extractor = einops_torch.Rearrange(
-            "b c (h_stride h) (w_stride w) -> b (h w) (h_stride w_stride c)", h_stride=patch_size, w_stride=patch_size
+        self.patch_projector = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=embedding_dim,
+            kernel_size=patch_size,
+            stride=patch_size
         )
-        self.patch_projector = nn.Linear(patch_size * patch_size * in_channels, projection_dim)
 
     def forward(self, images):
         assert images.dim() == 4, f"Expected 4D tensor but got: {images.dim()}D"
 
-        patches = self.patch_extractor(images)
-        patches = self.patch_projector(patches)
+        patches = self.patch_projector(images)
+        patches = rearrange(patches, "b c h w -> b (h w) c")
 
         return patches

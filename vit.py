@@ -3,7 +3,7 @@ from typing import Tuple
 import torch
 from torch import nn
 
-from layers.embeddings import PatchEmbedding, PositionalEmbedding
+from layers.embeddings import PatchEmbedding, SinCosEmbedding
 from layers.poolings import ClsPooling, MeanPooling
 from layers.transformer import TransformerEncoder
 
@@ -35,9 +35,7 @@ class VIT(nn.Module):
         self.embedding_dim = embedding_dim
         self.num_patches = (height // patch_size) * (width // patch_size)
         self.patch_dim = channels * patch_size * patch_size
-
-        self.cls_token = nn.Parameter(torch.rand(1, 1, self.embedding_dim))
-        self.positional_embedding = nn.Parameter(torch.randn(1, self.num_patches + 1, self.embedding_dim))
+        self.pooling_type = pooling
 
         self.patch_embedding = PatchEmbedding(patch_size, channels, embedding_dim)
 
@@ -50,17 +48,25 @@ class VIT(nn.Module):
             dropout=dropout
         )
 
-        self.pooling = ClsPooling() if pooling == "cls" else MeanPooling()
+        if self.pooling_type == "cls":
+            self.cls_token = nn.Parameter(torch.rand(self.embedding_dim))
+            self.pos_embed = nn.Parameter(torch.randn(self.num_patches + 1, self.embedding_dim))
+            self.pooling = ClsPooling()
+        else:
+            self.cls_token = None
+            self.pos_embed = nn.Parameter(torch.randn(self.num_patches, self.embedding_dim))
+            self.pooling = MeanPooling()
 
     def forward(self, x):
-        batch, _, _, _ = x.shape
-
         x = self.patch_embedding(x)
 
-        cls = self.cls_token.expand(batch, 1, -1)
-        x = torch.cat([cls, x], 1)
+        # Add CLS Token
+        if self.pooling_type == "cls":
+            b = x.size(0)
+            c = self.cls_token.expand(b, 1, -1)
+            x = torch.cat([c, x], 1)
 
-        x = self.positional_embedding + x
+        x = self.pos_embed + x
         x = self.transformer(x)
         x = self.pooling(x)
 
