@@ -39,10 +39,10 @@ model = VIT(
     patch_size=4,              # n x n patch
     embedding_dim=768,         # embedding dimension which
     layers=4,                  # number of transformer encoder layers
-    heads=4,                   # number of transformer encoder heads
+    heads=12,                  # number of transformer encoder heads
     head_dim=64,               # single head dimension
-    feedforward_dim=64,        # transformer encoder mlp dimension
-    dropout=0.5,               # dropout
+    feedforward_dim=2048,      # transformer encoder mlp dimension
+    dropout=0.2,               # dropout
     pooling="cls"              # [`cls`, `mean`]
 )
 
@@ -59,18 +59,18 @@ from vit import VITClassifier
 model = VITClassifier(
     num_classes=10,            # number of classes
     image_size=(3, 28, 28),    # channels x height x width  
-    patch_size=4,              # n x n patch
-    embedding_dim=768,         # embedding dimension which
+    patch_size=14,             # n x n patch
+    embedding_dim=768,         # embedding dimension
     layers=4,                  # number of transformer encoder layers
-    heads=4,                   # number of transformer encoder heads
+    heads=12,                  # number of transformer encoder heads
     head_dim=64,               # single head dimension
-    feedforward_dim=64,        # transformer encoder mlp dimension
-    dropout=0.5,               # dropout
+    feedforward_dim=2048,      # transformer encoder mlp dimension
+    dropout=0.2,               # dropout
     pooling="cls"              # [`cls`, `mean`]
 )
 
 x = torch.rand(32, 3, 28, 28)  # batch x channels x height x width
-classes = model(x)             # batch x num_classes
+classes = model(x)             # batch x num_classes (32 x 10)
 ```
 
 ### Pretrained models
