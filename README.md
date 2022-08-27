@@ -36,7 +36,7 @@ from vit import VIT
 
 model = VIT(
     image_size=(3, 28, 28),    # channels x height x width  
-    patch_size=4,              # n x n patch
+    patch_size=14,             # n x n patch
     embedding_dim=768,         # embedding dimension which
     layers=4,                  # number of transformer encoder layers
     heads=12,                  # number of transformer encoder heads
