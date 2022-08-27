@@ -1,4 +1,4 @@
-## Vision Transformer 
+## Vision Transformer
 
 This repository contains [PyTorch](https://pytorch.org/) implementation of original
 paper: *[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)*
@@ -76,4 +76,4 @@ classes = model(x)             # batch x num_classes (32 x 10)
 ### Pretrained models
 
 There are a few pretrained models:
-    _TODO_
+_TODO_
