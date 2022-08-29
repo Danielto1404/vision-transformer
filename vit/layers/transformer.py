@@ -1,6 +1,6 @@
 from torch import nn
 
-from layers.attention import MultiHeadAttention
+from vit.layers.attention import MultiHeadAttention
 
 
 class PreLayerNorm(nn.Module):

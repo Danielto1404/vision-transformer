@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# No build info
+*.egg-info/
+
 .idea
 
 # Distribution / packaging
