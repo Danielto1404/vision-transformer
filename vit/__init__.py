@@ -1,1 +1,1 @@
-from .vit import VITClassifier, VIT
+from .vit import ViTForClassification, ViT

@@ -32,45 +32,45 @@ $ pip install git@github.com:Danielto1404/vision-transformer.git
 
 ```python
 import torch
-from vit import VIT
+from vit import ViT
 
-model = VIT(
-    image_size=(3, 28, 28),    # channels x height x width  
-    patch_size=14,             # n x n patch
-    embedding_dim=768,         # embedding dimension which
-    layers=4,                  # number of transformer encoder layers
-    heads=12,                  # number of transformer encoder heads
-    head_dim=64,               # single head dimension
-    feedforward_dim=2048,      # transformer encoder mlp dimension
-    dropout=0.2,               # dropout
-    pooling="cls"              # [`cls`, `mean`]
+model = ViT(
+    image_size=(3, 28, 28),  # channels x height x width  
+    patch_size=14,  # n x n patch
+    embedding_dim=768,  # embedding dimension which
+    layers=4,  # number of transformer encoder layers
+    heads=12,  # number of transformer encoder heads
+    head_dim=64,  # single head dimension
+    feedforward_dim=2048,  # transformer encoder mlp dimension
+    dropout=0.2,  # dropout
+    pooling="cls"  # [`cls`, `mean`]
 )
 
 x = torch.rand(32, 3, 28, 28)  # batch x channels x height x width
-features = model(x)            # batch x embedding_dim
+features = model(x)  # batch x embedding_dim
 ```
 
 ### Classifier Example
 
 ```python
 import torch
-from vit import VITClassifier
+from vit import ViTForClassification
 
-model = VITClassifier(
-    num_classes=10,            # number of classes
-    image_size=(3, 28, 28),    # channels x height x width  
-    patch_size=14,             # n x n patch
-    embedding_dim=768,         # embedding dimension
-    layers=4,                  # number of transformer encoder layers
-    heads=12,                  # number of transformer encoder heads
-    head_dim=64,               # single head dimension
-    feedforward_dim=2048,      # transformer encoder mlp dimension
-    dropout=0.2,               # dropout
-    pooling="cls"              # [`cls`, `mean`]
+model = ViTForClassification(
+    num_classes=10,  # number of classes
+    image_size=(3, 28, 28),  # channels x height x width  
+    patch_size=14,  # n x n patch
+    embedding_dim=768,  # embedding dimension
+    layers=4,  # number of transformer encoder layers
+    heads=12,  # number of transformer encoder heads
+    head_dim=64,  # single head dimension
+    feedforward_dim=2048,  # transformer encoder mlp dimension
+    dropout=0.2,  # dropout
+    pooling="cls"  # [`cls`, `mean`]
 )
 
 x = torch.rand(32, 3, 28, 28)  # batch x channels x height x width
-classes = model(x)             # batch x num_classes (32 x 10)
+classes = model(x)  # batch x num_classes (32 x 10)
 ```
 
 ### Pretrained models

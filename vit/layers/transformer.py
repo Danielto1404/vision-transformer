@@ -1,6 +1,6 @@
-from torch import nn
+import torch.nn as nn
 
-from vit.layers.attention import MultiHeadAttention
+from .attention import MultiHeadAttention
 
 
 class PreLayerNorm(nn.Module):
@@ -33,8 +33,7 @@ class FeedForward(nn.Module):
             nn.Linear(dim, hidden_dim),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(hidden_dim, dim),
-            nn.Dropout(dropout)
+            nn.Linear(hidden_dim, dim)
         )
 
     def forward(self, x):
@@ -100,3 +99,11 @@ class TransformerEncoder(nn.Module):
             x = layer(x)
 
         return x
+
+
+__all__ = [
+    "PreLayerNorm",
+    "FeedForward",
+    "TransformerEncoder",
+    "TransformerEncoderLayer"
+]

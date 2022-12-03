@@ -1,14 +1,14 @@
 from typing import Tuple
 
 import torch
-from torch import nn
+import torch.nn as nn
 
-from layers.embeddings import PatchEmbedding, SinCosEmbedding
-from layers.poolings import ClsPooling, MeanPooling
+from layers.embeddings import PatchEmbedding
+from layers.poolings import ClsPooler, MeanPooler
 from layers.transformer import TransformerEncoder
 
 
-class VIT(nn.Module):
+class ViT(nn.Module):
     def __init__(
             self,
             image_size: Tuple[int, int, int],
@@ -21,7 +21,7 @@ class VIT(nn.Module):
             dropout: float = 0.0,
             pooling: str = "cls"
     ):
-        super(VIT, self).__init__()
+        super(ViT, self).__init__()
 
         channels, height, width = image_size
 
@@ -30,15 +30,11 @@ class VIT(nn.Module):
         assert height % patch_size == 0 and width % patch_size == 0, \
             "Image dimensions must be divisible by the patch size."
 
-        self.channels = channels
-        self.patch_size = patch_size
-        self.embedding_dim = embedding_dim
-        self.num_patches = (height // patch_size) * (width // patch_size)
-        self.patch_dim = channels * patch_size * patch_size
-        self.pooling_type = pooling
+        num_patches = (height // patch_size) * (width // patch_size)
 
-        self.patch_embedding = PatchEmbedding(patch_size, channels, embedding_dim)
+        self.pooling = pooling
 
+        self.embedding = PatchEmbedding(patch_size, channels, embedding_dim)
         self.transformer = TransformerEncoder(
             layers=layers,
             embedding_dim=embedding_dim,
@@ -48,17 +44,17 @@ class VIT(nn.Module):
             dropout=dropout
         )
 
-        if self.pooling_type == "cls":
-            self.cls_token = nn.Parameter(torch.rand(self.embedding_dim))
-            self.pos_embed = nn.Parameter(torch.randn(self.num_patches + 1, self.embedding_dim))
-            self.pooling = ClsPooling()
+        if pooling == "cls":
+            self.cls_token = nn.Parameter(torch.rand(embedding_dim))
+            self.pos_embed = nn.Parameter(torch.randn(num_patches + 1, embedding_dim))
+            self.pooler = ClsPooler()
         else:
             self.cls_token = None
-            self.pos_embed = nn.Parameter(torch.randn(self.num_patches, self.embedding_dim))
-            self.pooling = MeanPooling()
+            self.pos_embed = nn.Parameter(torch.randn(num_patches, embedding_dim))
+            self.pooler = MeanPooler()
 
     def forward(self, x):
-        x = self.patch_embedding(x)
+        x = self.embedding(x)
 
         # Add CLS Token
         if self.pooling_type == "cls":
@@ -68,12 +64,12 @@ class VIT(nn.Module):
 
         x = self.pos_embed + x
         x = self.transformer(x)
-        x = self.pooling(x)
+        x = self.pooler(x)
 
         return x
 
 
-class VITClassifier(VIT):
+class ViTForClassification(ViT):
     def __init__(
             self,
             num_classes: int,
@@ -87,7 +83,7 @@ class VITClassifier(VIT):
             dropout: float = 0.0,
             pooling: str = "cls"
     ):
-        super(VITClassifier, self).__init__(
+        super(ViTForClassification, self).__init__(
             image_size=image_size,
             patch_size=patch_size,
             embedding_dim=embedding_dim,
@@ -107,7 +103,13 @@ class VITClassifier(VIT):
         )
 
     def forward(self, x):
-        x = super(VITClassifier, self).forward(x)
+        x = super().forward(x)
         x = self.classifier(x)
 
         return x
+
+
+__all__ = [
+    "ViT",
+    "ViTForClassification"
+]

@@ -17,8 +17,8 @@ setup(
         'Crypto'
     ],
     install_requires=[
-        'numpy',
-        'torch'
+        "torch",
+        "einops"
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -3,7 +3,7 @@ from typing import Union, Tuple
 
 from einops import rearrange
 import torch
-from torch import nn
+import torch.nn as nn
 
 
 class SinCosEmbedding(nn.Module):
@@ -62,3 +62,9 @@ class PatchEmbedding(nn.Module):
         patches = rearrange(patches, "b c h w -> b (h w) c")
 
         return patches
+
+
+__all__ = [
+    "SinCosEmbedding",
+    "PatchEmbedding"
+]

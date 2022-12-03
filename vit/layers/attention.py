@@ -1,7 +1,7 @@
 import math
 
 from einops import rearrange
-from torch import nn
+import torch.nn as nn
 
 
 class MultiHeadAttention(nn.Module):
@@ -51,3 +51,8 @@ class MultiHeadAttention(nn.Module):
         out = self.projector(out)
 
         return out
+
+
+__all__ = [
+    "MultiHeadAttention"
+]
